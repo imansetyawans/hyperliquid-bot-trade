@@ -1,0 +1,43 @@
+{
+    "account_address": "0xYOUR_MAIN_WALLET_ADDRESS",
+    "secret_key": "0xYOUR_API_WALLET_PRIVATE_KEY",
+    "use_testnet": true,
+    "paper_trade": true,
+    "strategies": {
+        "ETH": {
+            "symbol": "ETH",
+            "direction": "long",
+            "enabled": true,
+            "leverage": 1,
+            "tp_pct": 0.18,
+            "sl_pct": 0.10,
+            "capital_pct": 0.25,
+            "regime_rsi": 55,
+            "entry_rsi": 55,
+            "fc_rsi": 45,
+            "regime_tf": "4h",
+            "entry_tf": "30m"
+        },
+        "ETH_SHORT": {
+            "symbol": "ETH",
+            "direction": "short",
+            "enabled": true,
+            "leverage": 3,
+            "tp_pct": 0.04,
+            "sl_pct": 0.06,
+            "capital_pct": 0.25,
+            "regime_rsi": 40,
+            "entry_rsi": 45,
+            "fc_rsi": 55,
+            "regime_tf": "4h",
+            "entry_tf": "30m"
+        }
+    },
+    "risk": {
+        "max_daily_loss_pct": 5.0,
+        "max_open_positions": 2,
+        "min_trade_interval_min": 5
+    },
+    "loop_interval_sec": 30,
+    "log_level": "INFO"
+}

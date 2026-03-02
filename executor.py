@@ -58,16 +58,28 @@ class Executor:
             logger.error(f"Error setting leverage for {symbol}: {e}")
             return False
 
+<<<<<<< HEAD
     def market_open_long(self, symbol: str, size_usd: float) -> dict | None:
         """
         Open a LONG position via market order.
         size_usd: notional value in USD to buy.
+=======
+    def market_open_long(self, symbol: str, size_usd: float, current_price: float | None = None) -> dict | None:
+        """
+        Open a LONG position via market order.
+        size_usd: notional value in USD to buy.
+        current_price: optional price to use (otherwise fetches live).
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
         Returns order result dict or None on failure.
         """
         for attempt in range(1, MAX_RETRIES + 1):
             try:
                 # Get current price to calculate size in coins
+<<<<<<< HEAD
                 mid = float(self.info.all_mids()[symbol])
+=======
+                mid = current_price or float(self.info.all_mids()[symbol])
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
                 decimals = self._sz_decimals.get(symbol, 4)
                 sz = round(size_usd / mid, decimals)
 
@@ -102,16 +114,28 @@ class Executor:
         logger.error(f"FAILED to open long {symbol} after {MAX_RETRIES} attempts")
         return None
 
+<<<<<<< HEAD
     def market_open_short(self, symbol: str, size_usd: float) -> dict | None:
         """
         Open a SHORT position via market order.
         size_usd: notional value in USD to sell.
+=======
+    def market_open_short(self, symbol: str, size_usd: float, current_price: float | None = None) -> dict | None:
+        """
+        Open a SHORT position via market order.
+        size_usd: notional value in USD to sell.
+        current_price: optional price to use (otherwise fetches live).
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
         Returns order result dict or None on failure.
         """
         for attempt in range(1, MAX_RETRIES + 1):
             try:
                 # Get current price to calculate size in coins
+<<<<<<< HEAD
                 mid = float(self.info.all_mids()[symbol])
+=======
+                mid = current_price or float(self.info.all_mids()[symbol])
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
                 decimals = self._sz_decimals.get(symbol, 4)
                 sz = round(size_usd / mid, decimals)
 
@@ -146,7 +170,11 @@ class Executor:
         logger.error(f"FAILED to open short {symbol} after {MAX_RETRIES} attempts")
         return None
 
+<<<<<<< HEAD
     def market_close_long(self, symbol: str, size: float | None = None) -> dict | None:
+=======
+    def market_close_long(self, symbol: str, size: float | None = None, current_price: float | None = None) -> dict | None:
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
         """Close an existing LONG position via market order. 
         If size is provided, it closes exactly that amount."""
         for attempt in range(1, MAX_RETRIES + 1):
@@ -183,7 +211,11 @@ class Executor:
         logger.error(f"FAILED to close {symbol} after {MAX_RETRIES} attempts")
         return None
 
+<<<<<<< HEAD
     def market_close_short(self, symbol: str, size: float | None = None) -> dict | None:
+=======
+    def market_close_short(self, symbol: str, size: float | None = None, current_price: float | None = None) -> dict | None:
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
         """Close an existing SHORT position via market order.
         If size is provided, it closes exactly that amount."""
         for attempt in range(1, MAX_RETRIES + 1):

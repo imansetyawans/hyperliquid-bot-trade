@@ -78,16 +78,22 @@ def run_strategy_cycle(
     current_price = candles_30m["close"].iloc[-1]
 
     # ── 3. If in position, check exits ───────────────────────
+<<<<<<< HEAD
     if pos_mgr.has_position(symbol):
         pos = pos_mgr.get_position(symbol)
 
         # Skip evaluation if this position belongs to a different strategy
         if pos.get("direction", "long") != direction:
             return
+=======
+    if pos_mgr.has_position(strat_id):
+        pos = pos_mgr.get_position(strat_id)
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
 
         # Check TP/SL (paper mode only — live uses exchange-side orders)
         if is_paper:
             tp_sl_hit = executor.check_tp_sl(symbol, current_price)
+<<<<<<< HEAD
             if tp_sl_hit == "tp":
                 tp_price = pos.get("tp_price", current_price)
                 result = executor.market_close_long(symbol, tp_price) if is_long else executor.market_close_short(symbol, tp_price)
@@ -101,10 +107,18 @@ def run_strategy_cycle(
                 result = executor.market_close_long(symbol, sl_price) if is_long else executor.market_close_short(symbol, sl_price)
                 if result:
                     trade = pos_mgr.close_position(symbol, sl_price, "Stop Loss")
+=======
+            if tp_sl_hit:
+                px = pos.get("tp_price" if tp_sl_hit == "tp" else "sl_price", current_price)
+                result = executor.market_close_long(symbol) if is_long else executor.market_close_short(symbol)
+                if result:
+                    trade = pos_mgr.close_position(strat_id, px, "Take Profit" if tp_sl_hit == "tp" else "Stop Loss")
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
                     if trade:
                         risk_mgr.record_trade(trade["pnl_usd"])
                 return
 
+<<<<<<< HEAD
         # Check Force Close
         if strat.should_force_close():
             logger.info(f"{strat_id} >>> FORCE CLOSE SIGNAL TRIGGERED <<<")
@@ -119,11 +133,47 @@ def run_strategy_cycle(
                 live_pos = executor.get_position(symbol)
                 sz = abs(live_pos["size"]) if live_pos else abs(pos.get("size", 0))
                 
+=======
+        # Check Strategy Exit signal
+        if strat.should_exit():
+            logger.info(f"{strat_id} >>> EXIT SIGNAL TRIGGERED <<<")
+            logger.info(f"{strat_id}: Exiting {direction.upper()} position at ${current_price:.2f}")
+
+            if is_paper:
+                result = executor.market_close_long(symbol) if is_long else executor.market_close_short(symbol)
+            else:
+                executor.cancel_all_orders(symbol)
+                live_pos = executor.get_position(symbol)
+                sz = abs(live_pos["size"]) if live_pos else abs(pos.get("size", 0))
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
                 result = executor.market_close_long(symbol, sz) if is_long else executor.market_close_short(symbol, sz)
 
             if result:
                 fill = result.get("fill_price", current_price) if is_paper else current_price
+<<<<<<< HEAD
                 trade = pos_mgr.close_position(symbol, fill, "Force Close")
+=======
+                trade = pos_mgr.close_position(strat_id, fill, "Strategy Signal")
+                if trade:
+                    risk_mgr.record_trade(trade["pnl_usd"])
+            return
+
+        # Check Force Close (Risk Management)
+        if risk_mgr.should_force_close(current_price):
+            logger.info(f"{strat_id} >>> FORCE CLOSE SIGNAL TRIGGERED <<<")
+            logger.info(f"{strat_id}: Executing FORCE CLOSE for {direction.upper()} position")
+            if is_paper:
+                result = executor.market_close_long(symbol) if is_long else executor.market_close_short(symbol)
+            else:
+                executor.cancel_all_orders(symbol)
+                live_pos = executor.get_position(symbol)
+                sz = abs(live_pos["size"]) if live_pos else abs(pos.get("size", 0))
+                result = executor.market_close_long(symbol, sz) if is_long else executor.market_close_short(symbol, sz)
+
+            if result:
+                fill = result.get("fill_price", current_price) if is_paper else current_price
+                trade = pos_mgr.close_position(strat_id, fill, "Force Close")
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
                 if trade:
                     risk_mgr.record_trade(trade["pnl_usd"])
             return
@@ -133,11 +183,19 @@ def run_strategy_cycle(
             live_pos = executor.get_position(symbol)
             if live_pos:
                 unrealized = live_pos.get("unrealized_pnl", 0)
+<<<<<<< HEAD
                 logger.debug(f"{symbol}: In position, unrealized P&L: ${unrealized:.2f}")
             else:
                 # Position was closed externally (TP/SL hit on exchange)
                 logger.info(f"{symbol}: Position closed externally (TP/SL hit)")
                 pos_mgr.close_position(symbol, current_price, "Exchange TP/SL")
+=======
+                logger.debug(f"{strat_id} ({symbol}): In position, unrealized P&L: ${unrealized:.2f}")
+            else:
+                # Position was closed externally (TP/SL hit on exchange)
+                logger.info(f"{strat_id} ({symbol}): Position closed externally (TP/SL hit)")
+                pos_mgr.close_position(strat_id, current_price, "Exchange TP/SL")
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
 
         return  # Already in position, nothing to do
 
@@ -168,6 +226,10 @@ def run_strategy_cycle(
         dir_str = "LONG" if is_long else "SHORT"
         logger.info(f"{strat_id} >>> {dir_str} ENTRY SIGNAL TRIGGERED <<<")
         logger.info(f"{strat_id}: ENTERING {dir_str} — ${size_usd:.2f} notional (${margin_used:.2f} margin × {leverage}x)")
+<<<<<<< HEAD
+=======
+        
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
         if is_paper:
             if is_long:
                 result = executor.market_open_long(symbol, size_usd, current_price)
@@ -176,19 +238,34 @@ def run_strategy_cycle(
             fill_price = result.get("fill_price", current_price) if result else current_price
         else:
             if is_long:
+<<<<<<< HEAD
                 result = executor.market_open_long(symbol, size_usd)
             else:
                 result = executor.market_open_short(symbol, size_usd)
+=======
+                result = executor.market_open_long(symbol, size_usd, current_price)
+            else:
+                result = executor.market_open_short(symbol, size_usd, current_price)
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
             fill_price = current_price  # Approximate; real fill may differ
 
         if result and result.get("status") == "ok":
             tp_price, sl_price = strat.calc_tp_sl(fill_price)
 
+<<<<<<< HEAD
             # Record position
             pos_mgr.open_position(symbol, fill_price, size_usd, tp_price, sl_price, direction=direction)
 
             # Set TP/SL
             if is_paper:
+=======
+            # Record position using strat_id as key
+            pos_mgr.open_position(strat_id, symbol, fill_price, size_usd, tp_price, sl_price, direction=direction)
+
+            # Set TP/SL
+            if is_paper:
+                # size 0 is ignored in paper mode, but let's be consistent
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
                 executor.place_tp_sl(symbol, 0, tp_price, sl_price)
             else:
                 # Add a brief delay to allow the exchange to process the position
@@ -201,7 +278,11 @@ def run_strategy_cycle(
                         break
                 
                 if live_pos:
+<<<<<<< HEAD
                     logger.info(f"Retrieved live position size: {live_pos['size']} (after delay)")
+=======
+                    logger.info(f"Retrieved live position size for {strat_id} ({symbol}): {live_pos['size']}")
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
                     executor.place_tp_sl(symbol, abs(live_pos["size"]), tp_price, sl_price, is_long=is_long)
                 else:
                     logger.warning(f"Could not retrieve live position for {symbol} to set TP/SL")
@@ -278,11 +359,24 @@ def main():
 
     # ── Set leverage on exchange ──────────────────────────────
     if not is_paper:
+<<<<<<< HEAD
         for strat_id, strat_cfg in config.get("strategies", {}).items():
             if strat_cfg.get("enabled", False):
                 symbol = strat_cfg.get("symbol", strat_id)
                 lev = strat_cfg.get("leverage", 1)
                 executor.set_leverage(symbol, lev, is_cross=True)
+=======
+        symbol_leverages = {}
+        for s_id, s_cfg in config.get("strategies", {}).items():
+            if s_cfg.get("enabled", False):
+                sym = s_cfg.get("symbol", s_id)
+                l = s_cfg.get("leverage", 1)
+                symbol_leverages[sym] = max(symbol_leverages.get(sym, 0), l)
+        
+        for sym, l in symbol_leverages.items():
+            logger.info(f"Setting leverage for {sym} to {l}x...")
+            executor.set_leverage(sym, l, is_cross=True)
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
 
     # ── Sync existing positions (for bot restart) ────────────
     if not is_paper:
@@ -378,6 +472,7 @@ def main():
             else:
                 # Between candle closes — check TP/SL if in paper mode
                 if is_paper:
+<<<<<<< HEAD
                     for symbol in strategies:
                         if pos_mgr.has_position(symbol):
                             mid = fetcher.get_mid_price(symbol)
@@ -397,6 +492,27 @@ def main():
                                     result = executor.market_close_long(symbol, sl_px)
                                     if result:
                                         trade = pos_mgr.close_position(symbol, sl_px, "Stop Loss")
+=======
+                    for s_id, strat in strategies.items():
+                        if pos_mgr.has_position(s_id):
+                            sym = strat.symbol
+                            mid = fetcher.get_mid_price(sym)
+                            if mid:
+                                tp_sl = executor.check_tp_sl(sym, mid)
+                                if tp_sl:
+                                    pos_data = pos_mgr.get_position(s_id)
+                                    is_long = pos_data.get("direction") == "long"
+                                    px = pos_data.get("tp_price" if tp_sl == "tp" else "sl_price", mid)
+                                    
+                                    if is_long:
+                                        res = executor.market_close_long(sym)
+                                    else:
+                                        res = executor.market_close_short(sym)
+                                        
+                                    if res:
+                                        reason = "Take Profit" if tp_sl == "tp" else "Stop Loss"
+                                        trade = pos_mgr.close_position(s_id, px, reason)
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
                                         if trade:
                                             risk_mgr.record_trade(trade["pnl_usd"])
 

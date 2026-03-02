@@ -18,8 +18,17 @@ class PaperTrader:
         self._trade_count = 0
         logger.info(f"Paper Trader initialized with ${initial_balance:,.2f}")
 
+<<<<<<< HEAD
     def market_open_long(self, symbol: str, size_usd: float, current_price: float) -> dict | None:
         """Simulate opening a long position."""
+=======
+    def market_open_long(self, symbol: str, size_usd: float, current_price: float | None = None) -> dict | None:
+        """Simulate opening a long position."""
+        if current_price is None:
+            logger.error("[PAPER] market_open_long requires current_price")
+            return None
+
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
         if size_usd > self.balance:
             logger.warning(f"[PAPER] Insufficient balance: ${self.balance:.2f} < ${size_usd:.2f}")
             return None
@@ -47,8 +56,17 @@ class PaperTrader:
         )
         return {"status": "ok", "paper": True, "fill_price": fill_price}
 
+<<<<<<< HEAD
     def market_open_short(self, symbol: str, size_usd: float, current_price: float) -> dict | None:
         """Simulate opening a short position."""
+=======
+    def market_open_short(self, symbol: str, size_usd: float, current_price: float | None = None) -> dict | None:
+        """Simulate opening a short position."""
+        if current_price is None:
+            logger.error("[PAPER] market_open_short requires current_price")
+            return None
+
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
         if size_usd > self.balance:
             logger.warning(f"[PAPER] Insufficient balance: ${self.balance:.2f} < ${size_usd:.2f}")
             return None
@@ -76,8 +94,17 @@ class PaperTrader:
         )
         return {"status": "ok", "paper": True, "fill_price": fill_price}
 
+<<<<<<< HEAD
     def market_close_long(self, symbol: str, current_price: float, size: float | None = None) -> dict | None:
         """Simulate closing a long position."""
+=======
+    def market_close_long(self, symbol: str, size: float | None = None, current_price: float | None = None) -> dict | None:
+        """Simulate closing a long position."""
+        if current_price is None:
+            logger.error("[PAPER] market_close_long requires current_price")
+            return None
+            
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
         if symbol not in self._positions:
             logger.warning(f"[PAPER] No position to close for {symbol}")
             return None
@@ -105,8 +132,17 @@ class PaperTrader:
             "pnl": pnl, "pnl_pct": pnl_pct,
         }
 
+<<<<<<< HEAD
     def market_close_short(self, symbol: str, current_price: float, size: float | None = None) -> dict | None:
         """Simulate closing a short position."""
+=======
+    def market_close_short(self, symbol: str, size: float | None = None, current_price: float | None = None) -> dict | None:
+        """Simulate closing a short position."""
+        if current_price is None:
+            logger.error("[PAPER] market_close_short requires current_price")
+            return None
+
+>>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
         if symbol not in self._positions:
             logger.warning(f"[PAPER] No position to close for {symbol}")
             return None

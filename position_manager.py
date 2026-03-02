@@ -12,11 +12,7 @@ logger = logging.getLogger("bot")
 
 TRADE_LOG_FILE = os.path.join("logs", "trades.csv")
 TRADE_HEADERS = [
-<<<<<<< HEAD
-    "timestamp", "symbol", "action", "entry_price", "exit_price",
-=======
     "timestamp", "strategy_id", "symbol", "direction", "action", "entry_price", "exit_price",
->>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
     "size_usd", "pnl_usd", "pnl_pct", "exit_reason", "duration_min"
 ]
 
@@ -25,11 +21,7 @@ class PositionManager:
     """Track positions and log trades."""
 
     def __init__(self):
-<<<<<<< HEAD
-        self._positions: dict[str, dict] = {}  # symbol -> position info
-=======
         self._positions: dict[str, dict] = {}  # strategy_id -> position info
->>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
         self._ensure_trade_log()
 
     def _ensure_trade_log(self):
@@ -38,18 +30,6 @@ class PositionManager:
             with open(TRADE_LOG_FILE, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(TRADE_HEADERS)
-<<<<<<< HEAD
-
-    def has_position(self, symbol: str) -> bool:
-        return symbol in self._positions
-
-    def open_position(
-        self, symbol: str, entry_price: float, size_usd: float,
-        tp_price: float, sl_price: float, direction: str = "long"
-    ):
-        """Record opening a new position."""
-        self._positions[symbol] = {
-=======
         else:
             # Check if headers match
             try:
@@ -77,7 +57,6 @@ class PositionManager:
         """Record opening a new position."""
         self._positions[strategy_id] = {
             "symbol": symbol,
->>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
             "direction": direction,
             "entry_price": entry_price,
             "size_usd": size_usd,
@@ -86,32 +65,18 @@ class PositionManager:
             "entry_time": datetime.now(),
         }
         logger.info(
-<<<<<<< HEAD
-            f"POSITION OPENED: {symbol} [{direction.upper()}] @ ${entry_price:.2f} | "
-            f"Size: ${size_usd:.2f} | TP: ${tp_price:.2f} | SL: ${sl_price:.2f}"
-        )
-
-    def close_position(self, symbol: str, exit_price: float, reason: str) -> dict | None:
-        """Record closing a position. Returns trade summary."""
-        if symbol not in self._positions:
-            logger.warning(f"No position to close for {symbol}")
-            return None
-
-        pos = self._positions.pop(symbol)
-=======
-            f"POSITION OPENED: {strategy_id} ({symbol}) [{direction.upper()}] @ ${entry_price:.2f} | "
+            f"POSITION OPENED: {strategy_id} ({symbol}) | [{direction.upper()}] @ ${entry_price:.2f} | "
             f"Size: ${size_usd:.2f} | TP: ${tp_price:.2f} | SL: ${sl_price:.2f}"
         )
 
     def close_position(self, strategy_id: str, exit_price: float, reason: str) -> dict | None:
         """Record closing a position. Returns trade summary."""
         if strategy_id not in self._positions:
-            logger.warning(f"No position to close for strategy {strategy_id}")
+            logger.warning(f"No position to close for {strategy_id}")
             return None
 
         pos = self._positions.pop(strategy_id)
         symbol = pos["symbol"]
->>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
         entry = pos["entry_price"]
         direction = pos.get("direction", "long")
         
@@ -119,27 +84,17 @@ class PositionManager:
             pnl_pct = (exit_price / entry - 1) * 100
             pnl_usd = pos["size_usd"] * (exit_price / entry - 1)
         else:
-<<<<<<< HEAD
+            # Short P&L: (Entry/Exit - 1) * 100
             pnl_pct = (entry / exit_price - 1) * 100
             pnl_usd = pos["size_usd"] * (entry / exit_price - 1)
-=======
-            # Short P&L: (1 - Exit/Entry) * Size or (Entry/Exit - 1) * Size? 
-            # Standard: (Entry - Exit) / Entry * Size
-            pnl_pct = (1 - exit_price / entry) * 100
-            pnl_usd = pos["size_usd"] * (1 - exit_price / entry)
->>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
             
         duration = (datetime.now() - pos["entry_time"]).total_seconds() / 60
 
         trade = {
             "timestamp": datetime.now().isoformat(),
-<<<<<<< HEAD
-            "symbol": symbol,
-=======
             "strategy_id": strategy_id,
             "symbol": symbol,
             "direction": direction,
->>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
             "action": "CLOSE",
             "entry_price": round(entry, 2),
             "exit_price": round(exit_price, 2),
@@ -157,24 +112,15 @@ class PositionManager:
 
         emoji = "+" if pnl_usd > 0 else ""
         logger.info(
-<<<<<<< HEAD
-            f"POSITION CLOSED: {symbol} | {reason} | "
-=======
             f"POSITION CLOSED: {strategy_id} ({symbol}) | {reason} | "
->>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
             f"Entry ${entry:.2f} -> Exit ${exit_price:.2f} | "
             f"P&L: {emoji}${pnl_usd:.2f} ({emoji}{pnl_pct:.2f}%) | "
             f"Duration: {duration:.0f}min"
         )
         return trade
 
-<<<<<<< HEAD
-    def get_position(self, symbol: str) -> dict | None:
-        return self._positions.get(symbol)
-=======
     def get_position(self, strategy_id: str) -> dict | None:
         return self._positions.get(strategy_id)
->>>>>>> 5d7e268 (Fix trade anomalies, strategy collisions, and paper trading bugs)
 
     def get_all_positions(self) -> dict:
         return dict(self._positions)
